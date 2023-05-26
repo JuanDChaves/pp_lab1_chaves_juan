@@ -1,6 +1,8 @@
 import json
 import re
 
+# Juan David Chaves Rodriguez
+
 json_path = "/Users/juandchaves/src/utn/I/prog_lab/Parcial/dt.json"
 
 
@@ -194,7 +196,85 @@ def show_player_achievements() -> None:
         print("*ERROR*")
 
 
+def value_average(players_list: list, stat: str) -> float:
+    value_sum = 0.0
+    for player in players_list:
+        value_sum += player["estadisticas"][stat]
+
+    average = value_sum / len(players_list)
+
+    return average
+
+
 # 5
+def average_ordered_list() -> None:
+    """
+    Calls value_average and gets the average by stat
+    Prints the average by stat, an ordered list by stat and an alphabetically ordered list by stat
+    """
+    stat = "promedio_puntos_por_partido"
+    aux_players_list = players_list.copy()
+    # A. Average
+    team_average = value_average(aux_players_list, stat)
+    message_1 = "El promedio del {0} de todo el Dream Team es: {1:.2f}".format(
+        stat, team_average
+    )
+    print(message_1)
+
+    # B. List by stat C. Alphabetical ordet
+    list_by_stat = []
+    players_id_by_stat = []
+    players_by_name = []
+    index = 0
+    for player in aux_players_list:
+        list_by_stat.append(player["estadisticas"][stat])
+        players_id_by_stat.append(index)
+        players_by_name.append(player["nombre"])
+
+        index += 1
+    swapped = True
+    current_range_a = len(players_id_by_stat)
+    current_range_b = len(players_by_name)
+    while swapped:
+        swapped = False
+        current_range_a -= 1
+        for index in range(current_range_a):
+            if list_by_stat[index] > list_by_stat[index + 1]:
+                aux_value = list_by_stat[index]
+                aux_id = players_id_by_stat[index]
+                list_by_stat[index] = list_by_stat[index + 1]
+                players_id_by_stat[index] = players_id_by_stat[index + 1]
+                list_by_stat[index + 1] = aux_value
+                players_id_by_stat[index + 1] = aux_id
+                swapped = True
+
+        current_range_b -= 1
+        for index in range(current_range_b):
+            if players_by_name[index] > players_by_name[index + 1]:
+                aux_value = players_by_name[index]
+                players_by_name[index] = players_by_name[index + 1]
+                players_by_name[index + 1] = aux_value
+                swapped = True
+
+    print("La lista de los promedios ordenados es: ")
+    aux_index = 0
+    for value in list_by_stat:
+        player = aux_players_list[players_id_by_stat[aux_index]]["nombre"]
+        message_2 = "{0}: {1}".format(player, value)
+        print(message_2)
+        aux_index += 1
+
+    print("La lista de los nombres ordenados es: ")
+    aux_index = 0
+    for player in players_by_name:
+        for aux_index in range(len(aux_players_list)):
+            if player == aux_players_list[aux_index]["nombre"]:
+                aux_value = aux_players_list[aux_index]["estadisticas"][stat]
+                message_3 = "{0}: {1} puntos por partido en prometio".format(
+                    player, aux_value
+                )
+                print(message_3)
+            aux_index += 1
 
 
 # 6
@@ -227,21 +307,6 @@ def hof_member_check() -> None:
         print("*ERROR*")
 
 
-#  ESTE CREO QUE NO TOCA HACERLO
-def value_average(players_list: list, stat: str) -> float:
-    value_sum = 0.0
-    for player in players_list:
-        value_sum += player["estadisticas"][stat]
-
-    average = value_sum / len(players_list)
-    print("average: ", average)
-
-    return average
-
-
-# ********************************************
-
-
 def float_input() -> float:
     """
     Receives the list of players
@@ -258,12 +323,50 @@ def float_input() -> float:
     return users_input_float
 
 
-# 10, 11, 12, 15, 18
+def list_by_position(players_above: list, players_list: list) -> list:
+    """
+    Receives a filtered list of players and the original list of players
+    Sorts every element in list by position
+    Returns a list of strings
+    """
+
+    list_position = [None] * 5
+    escolta = []
+    base = []
+    ala_pivot = []
+    alero = []
+    pivot = []
+
+    for player in players_list:
+        if player["nombre"] in players_above:
+            if player["posicion"] == "Escolta":
+                escolta.append(player["nombre"])
+            elif player["posicion"] == "Base":
+                base.append(player["nombre"])
+            elif player["posicion"] == "Ala-Pivot":
+                ala_pivot.append(player["nombre"])
+            elif player["posicion"] == "Alero":
+                alero.append(player["nombre"])
+            elif player["posicion"] == "Pivot":
+                pivot.append(player["nombre"])
+
+    list_position[0] = escolta
+    list_position[1] = base
+    list_position[2] = ala_pivot
+    list_position[3] = alero
+    list_position[4] = pivot
+
+    return list_position
+
+
+# 10, 11, 12, 15, 18, 20
 def player_above_input_by_value(stat: str):
     """
     Receives the stat to be evaluated in a string
     Prints a string with the players that are above the input number by stat
     """
+
+    # "posicion" "porcentaje_tiros_de_campo"
     aux_players_list = players_list.copy()
     input_float = float_input()
     aux_players_above = []
@@ -275,15 +378,27 @@ def player_above_input_by_value(stat: str):
         message = "*ERROR* No se encontraron resultados"
     else:
         players_above = ", ".join(aux_players_above)
-        message = "Los jugadores con {0} por encima de {1} son: {2}".format(
-            stat, str(input_float), players_above
-        )
+        if stat == "porcentaje_tiros_de_campo":
+            list_position = list_by_position(players_above, aux_players_list)
+            message = "Los jugadores con {0} por encima de {1} son: \n - Escolta: {2} \n - Base: {3} \n - Ala-Pivot: {4} \n - Alero: {5} \n - Pivot: {6}".format(
+                stat,
+                str(input_float),
+                ", ".join(list_position[0]),
+                ", ".join(list_position[1]),
+                ", ".join(list_position[2]),
+                ", ".join(list_position[3]),
+                ", ".join(list_position[4]),
+            )
+        else:
+            message = "Los jugadores con {0} por encima de {1} son: {2}".format(
+                stat, str(input_float), players_above
+            )
 
     print(message)
 
 
 # 7, 8, 9, 13, 14, 17, 19
-def calculate_player_with_highest_value(stat: str) -> str:
+def calculate_best_player_by_value(stat: str) -> str:
     aux_players_list = players_list.copy()
 
     if stat == "logros":
@@ -309,12 +424,76 @@ def calculate_player_with_highest_value(stat: str) -> str:
     print(message)
 
 
-# 5, 16
+# 16
+def calculate_average_points_excluding_worst() -> None:
+    """
+    Does not receive nor returns any value
+    Prints the average of stat excluding the lower value in the list
+    """
+    aux_players_list = players_list.copy()
+    stat = "promedio_puntos_por_partido"
+    list_by_stat = []
+    for player in aux_players_list:
+        list_by_stat.append(float(player["estadisticas"][stat]))
 
-# def player_above_average_by_value(stat: str):
-# 20 -> player_above_average_by_value() "posicion" "porcentaje_tiros_de_campo"
+    current_range = len(list_by_stat)
+    swapped = True
+
+    while swapped:
+        swapped = False
+        current_range -= 1
+        for index in range(current_range):
+            if list_by_stat[index] > list_by_stat[index + 1]:
+                aux_value = list_by_stat[index]
+                list_by_stat[index] = list_by_stat[index + 1]
+                list_by_stat[index + 1] = aux_value
+                swapped = True
+
+    value_sum = 0.0
+    for value in list_by_stat[1:]:
+        value_sum += value
+
+    average = value_sum / len(list_by_stat[1:])
+
+    message = "El promedio de los promedios de puntos por partido de todo el equipo excluyendo al valor más bajo es: {0:.2f}".format(
+        average
+    )
+    print(message)
+
 
 # 23
+def ranking_by_stats():
+    aux_players_list = players_list.copy()
+    nombre_list = []
+    puntos_totales = []
+    # rebotes_totales = []
+    # asistencias_totales = []
+    # robos_totales = []
+    for player in aux_players_list:
+        nombre_list.append(player["nombre"])
+        puntos_totales.append(player["estadisticas"]["puntos_totales"])
+        # rebotes_totales.append(player["estadisticas"]["rebotes_totales"])
+        # asistencias_totales.append(player["estadisticas"]["asistencias_totales"])
+        # robos_totales.append(player["estadisticas"]["robos_totales"])
+
+    info = [{"nombre": "michael", "puntos_totales": 23}, {}]  # por ejemplo
+    headers = ["Nombre", "Puntos", "Rebotes", "Asistencias", "Robos"]
+    for index in range(len(nombre_list)):
+        message = "{0} || {1}\n".format(
+            nombre_list[index],
+            puntos_totales[index],
+            # rebotes_totales[index],
+            # asistencias_totales[index],
+            # robos_totales[index],
+        )
+        print(message)
+
+
+"nombre"
+"puntos_totales"
+"rebotes_totales"
+"asistencias_totales"
+"robos_totales"
 
 while True:
     numeral_str = input(
@@ -333,16 +512,15 @@ while True:
         case 4:
             show_player_achievements()
         case 5:
-            # Calcular y mostrar
-            pass
+            average_ordered_list()
         case 6:
             hof_member_check()
         case 7:
-            calculate_player_with_highest_value("rebotes_totales")
+            calculate_best_player_by_value("rebotes_totales")
         case 8:
-            calculate_player_with_highest_value("porcentaje_tiros_de_campo")
+            calculate_best_player_by_value("porcentaje_tiros_de_campo")
         case 9:
-            calculate_player_with_highest_value("asistencias_totales")
+            calculate_best_player_by_value("asistencias_totales")
         case 10:
             player_above_input_by_value("promedio_puntos_por_partido")
         case 11:
@@ -350,25 +528,23 @@ while True:
         case 12:
             player_above_input_by_value("promedio_asistencias_por_partido")
         case 13:
-            calculate_player_with_highest_value("robos_totales")
+            calculate_best_player_by_value("robos_totales")
         case 14:
-            calculate_player_with_highest_value("bloqueos_totales")
+            calculate_best_player_by_value("bloqueos_totales")
         case 15:
             player_above_input_by_value("porcentaje_tiros_libres")
         case 16:
-            # Calcular y mostrar
-            pass
+            calculate_average_points_excluding_worst()
         case 17:
-            calculate_player_with_highest_value("logros")
+            calculate_best_player_by_value("logros")
         case 18:
             player_above_input_by_value("porcentaje_tiros_triples")
         case 19:
-            calculate_player_with_highest_value("temporadas")
+            calculate_best_player_by_value("temporadas")
         case 20:
-            # Permitir
-            pass
+            player_above_input_by_value("porcentaje_tiros_de_campo")
         case 23:
-            pass
+            ranking_by_stats()
         case 0:
             print("Gracias, nos vemos!")
             break
