@@ -357,8 +357,6 @@ def player_above_input_by_value(stat: str) -> None:
     Receives the stat to be evaluated in a string
     Prints a string with the players that are above the input number by stat
     """
-
-    # "posicion" "porcentaje_tiros_de_campo"
     aux_players_list = players_list.copy()
     input_float = float_input()
     aux_players_above = []
