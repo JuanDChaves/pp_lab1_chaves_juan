@@ -16,14 +16,6 @@ def json_reader(path: str) -> list:
 players = json_reader(json_path)
 players_list = players["jugadores"]
 
-"""
-average()
-verify_input(input_value: str)
-greater_than_average(value: str)
-best_by_key()
-print_result()??
-"""
-
 # 1
 
 
@@ -360,7 +352,7 @@ def list_by_position(players_above: list, players_list: list) -> list:
 
 
 # 10, 11, 12, 15, 18, 20
-def player_above_input_by_value(stat: str):
+def player_above_input_by_value(stat: str) -> None:
     """
     Receives the stat to be evaluated in a string
     Prints a string with the players that are above the input number by stat
@@ -398,7 +390,11 @@ def player_above_input_by_value(stat: str):
 
 
 # 7, 8, 9, 13, 14, 17, 19
-def calculate_best_player_by_value(stat: str) -> str:
+def calculate_best_player_by_value(stat: str) -> None:
+    """
+    Recieves a str value within "estadisticas"
+    Prints a string with the best players name according to the evaluated stat
+    """
     aux_players_list = players_list.copy()
 
     if stat == "logros":
@@ -461,39 +457,89 @@ def calculate_average_points_excluding_worst() -> None:
     print(message)
 
 
+def order_list(unordered_list: list) -> list:
+    """
+    Receives a list of unordered values
+    Returns a list of ordered values
+    """
+    ordered_list = unordered_list.copy()
+    swapped = True
+    current_range = len(ordered_list)
+
+    while swapped:
+        swapped = False
+        current_range -= 1
+        for index in range(current_range):
+            if ordered_list[index] < ordered_list[index + 1]:
+                aux_value = ordered_list[index]
+                ordered_list[index] = ordered_list[index + 1]
+                ordered_list[index + 1] = aux_value
+                swapped = True
+
+    return ordered_list
+
+
 # 23
-def ranking_by_stats():
+def ranking_by_stats() -> None:
+    """
+    Does not receive nor returns any value
+    Creates a CSV file with the int rankings of each player according to each stat
+    """
     aux_players_list = players_list.copy()
-    nombre_list = []
+    nombres = []
     puntos_totales = []
-    # rebotes_totales = []
-    # asistencias_totales = []
-    # robos_totales = []
+    rebotes_totales = []
+    asistencias_totales = []
+    robos_totales = []
     for player in aux_players_list:
-        nombre_list.append(player["nombre"])
+        nombres.append(player["nombre"])
         puntos_totales.append(player["estadisticas"]["puntos_totales"])
-        # rebotes_totales.append(player["estadisticas"]["rebotes_totales"])
-        # asistencias_totales.append(player["estadisticas"]["asistencias_totales"])
-        # robos_totales.append(player["estadisticas"]["robos_totales"])
+        rebotes_totales.append(player["estadisticas"]["rebotes_totales"])
+        asistencias_totales.append(player["estadisticas"]["asistencias_totales"])
+        robos_totales.append(player["estadisticas"]["robos_totales"])
 
-    info = [{"nombre": "michael", "puntos_totales": 23}, {}]  # por ejemplo
-    headers = ["Nombre", "Puntos", "Rebotes", "Asistencias", "Robos"]
-    for index in range(len(nombre_list)):
-        message = "{0} || {1}\n".format(
-            nombre_list[index],
-            puntos_totales[index],
-            # rebotes_totales[index],
-            # asistencias_totales[index],
-            # robos_totales[index],
-        )
-        print(message)
+    puntos_totales = order_list(puntos_totales)
+    rebotes_totales = order_list(rebotes_totales)
+    asistencias_totales = order_list(asistencias_totales)
+    robos_totales = order_list(robos_totales)
 
+    info = []
 
-"nombre"
-"puntos_totales"
-"rebotes_totales"
-"asistencias_totales"
-"robos_totales"
+    for index in range(len(aux_players_list)):
+        player_dict = {}
+        player_dict["Nombre"] = nombres[index]
+        for rank in range(len(aux_players_list)):
+            if (
+                aux_players_list[index]["estadisticas"]["puntos_totales"]
+                == puntos_totales[rank]
+            ):
+                player_dict["Puntos Totales"] = str(rank + 1)
+            if (
+                aux_players_list[index]["estadisticas"]["rebotes_totales"]
+                == rebotes_totales[rank]
+            ):
+                player_dict["Rebotes Totales"] = str(rank + 1)
+            if (
+                aux_players_list[index]["estadisticas"]["asistencias_totales"]
+                == asistencias_totales[rank]
+            ):
+                player_dict["Asistencias Totales"] = str(rank + 1)
+            if (
+                aux_players_list[index]["estadisticas"]["robos_totales"]
+                == robos_totales[rank]
+            ):
+                player_dict["Robos Totales"] = str(rank + 1)
+        info.append(player_dict)
+
+    csv_rank_path = "/Users/juandchaves/src/utn/I/prog_lab/Parcial/team_ranking.csv"
+    keys = ["Nombre", "Puntos", "Rebotes", "Asistencias", "Robos"]
+    with open(csv_rank_path, "w+") as file:
+        keys_str = ", ".join(keys)
+        file.write("{0}\n".format(keys_str))
+        for item in info:
+            player_line = ", ".join(item.values())
+            file.write("{0}\n".format(player_line))
+
 
 while True:
     numeral_str = input(
