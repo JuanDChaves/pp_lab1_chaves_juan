@@ -312,6 +312,8 @@ def float_input() -> float:
     else:
         print("*ERROR*")
 
+    # return algo que no sea valido (None, False)
+
     return users_input_float
 
 
@@ -328,6 +330,8 @@ def list_by_position(players_above: list, players_list: list) -> list:
     ala_pivot = []
     alero = []
     pivot = []
+
+    # Mejor con un dict
 
     for player in players_list:
         if player["nombre"] in players_above:
@@ -385,6 +389,9 @@ def player_above_input_by_value(stat: str) -> None:
             )
 
     print(message)
+
+
+# Solo se copia la lista si la voy a modificar
 
 
 # 7, 8, 9, 13, 14, 17, 19
@@ -539,9 +546,148 @@ def ranking_by_stats() -> None:
             file.write("{0}\n".format(player_line))
 
 
+# 30
+def players_by_position() -> None:
+    """
+    Prints a str for every loop of a list of ordered values
+    Escolta - Base - Ala-Pivot - Alero - Pivot
+    """
+    aux_players_list = players_list.copy()
+
+    player_dict = {}
+    for player in aux_players_list:
+        if player["posicion"] in player_dict:
+            player_dict[player["posicion"]] += 1
+        else:
+            player_dict[player["posicion"]] = 1
+
+    for key, value in player_dict.items():
+        message = "{0}: {1}".format(key, value)
+        print(message)
+
+
+# 31
+def times_being_allstar(players_list: list) -> None:
+    """
+    Receives a list of players
+    Prints a str for every loop of a list of ordered values
+
+    """
+    allstar_list = []
+    allstar_id = []
+
+    for index in range(len(players_list)):
+        for achievemnt in players_list[index]["logros"]:
+            pattern = "^\d{2}\s{1}veces All-Star$"
+            match = re.match(pattern, achievemnt)
+            if match != None:
+                allstar_list.append(int(achievemnt[0:2]))
+                allstar_id.append(index)
+
+    swapped = True
+    current_range = len(allstar_list)
+    while swapped:
+        swapped = False
+        current_range -= 1
+        for index in range(current_range):
+            if allstar_list[index] < allstar_list[index + 1]:
+                aux_value = allstar_list[index]
+                aux_id = allstar_id[index]
+                allstar_list[index] = allstar_list[index + 1]
+                allstar_id[index] = allstar_id[index + 1]
+                allstar_list[index + 1] = aux_value
+                allstar_id[index + 1] = aux_id
+                swapped = True
+
+    for index in range(len(allstar_list)):
+        message = "{0} ({1} veces All Star)".format(
+            players_list[allstar_id[index]]["nombre"], allstar_list[index]
+        )
+        print(message)
+
+
+def calculate_best_by_stat(players_list: list, stat: str) -> str:
+    best = 0
+    best_index = 0
+    for index in range(len(players_list)):
+        if players_list[index]["estadisticas"][stat] > best:
+            best = players_list[index]["estadisticas"][stat]
+            best_index = index
+
+    result = (best, best_index)
+    return result
+
+
+# 32
+def best_player_by_stat(players_list: list) -> str:
+    """
+    Receives a list of players
+    Prints a str for every loop of a list of ordered values
+    Returns a str with the name of the best player
+    """
+
+    stats_list = [
+        "temporadas",
+        "puntos_totales",
+        "promedio_puntos_por_partido",
+        "rebotes_totales",
+        "promedio_rebotes_por_partido",
+        "asistencias_totales",
+        "promedio_asistencias_por_partido",
+        "robos_totales",
+        "bloqueos_totales",
+        "porcentaje_tiros_de_campo",
+        "porcentaje_tiros_libres",
+        "porcentaje_tiros_triples",
+    ]
+    best_list = []
+    for stat in stats_list:
+        for index in range(len(players_list)):
+            if stat == "temporadas":
+                stats = calculate_best_by_stat(players_list, stat)
+            if stat == "puntos_totales":
+                stats = calculate_best_by_stat(players_list, stat)
+            if stat == "promedio_puntos_por_partido":
+                stats = calculate_best_by_stat(players_list, stat)
+            if stat == "rebotes_totales":
+                stats = calculate_best_by_stat(players_list, stat)
+            if stat == "promedio_rebotes_por_partido":
+                stats = calculate_best_by_stat(players_list, stat)
+            if stat == "asistencias_totales":
+                stats = calculate_best_by_stat(players_list, stat)
+            if stat == "promedio_asistencias_por_partido":
+                stats = calculate_best_by_stat(players_list, stat)
+            if stat == "bloqueos_totales":
+                stats = calculate_best_by_stat(players_list, stat)
+            if stat == "porcentaje_tiros_de_campo":
+                stats = calculate_best_by_stat(players_list, stat)
+            if stat == "porcentaje_tiros_libres":
+                stats = calculate_best_by_stat(players_list, stat)
+            if stat == "porcentaje_tiros_triples":
+                stats = calculate_best_by_stat(players_list, stat)
+        best_list.append(stats[1])
+        message = "{0}: {1} ({2})".format(
+            stat, players_list[stats[1]]["nombre"], stats[0]
+        )
+        print(message)
+    return best_list[0]  # todavia no es dinamico
+
+
+# 33
+def best_overall_player():
+    best = best_player_by_stat(players_list)
+
+    message = "El jugador con mejores estadisticas es: {0}".format(
+        players_list[best]["nombre"]
+    )
+
+    print(message)
+
+
+# meter while y lineas de arriba en funcion main, leer archivo, menu
 while True:
     numeral_str = input(
-        "DREAM TEAM | Parcial\nSelecciona alguna de las opciones: \n1.Lista de Jugadores y su posicion  \n2. Estadisticas por jugador  \n3. Guardar en CSV estadisticas de la opcion 2  \n4. Logros por jugador  \n5. Ranking promedio de puntos por partido  \n6. ¿Miembro del salón de la Fama del Baloncesto?  \n7. Jugador con la mayor cantidad de rebotes totales  \n8. Jugador con el mayor porcentaje de tiros de campo. \n9. Jugador con la mayor cantidad de asistencias totales. \n10. Jugadores que han promediado más puntos por partido superior a: \n11. Jugadores que han promediado más rebotes por partido superior a: \n12. Jugadores que han promediado más asistencias por partido superior a: \n13. Jugador con la mayor cantidad de robos totales. \n14. Jugador con la mayor cantidad de bloqueos totales. \n15. Jugadores que hayan tenido un porcentaje de tiros libres superior a: \n16. Promedio de puntos por partido del equipo excluyendo al jugador con la menor cantidad. \n17. Jugador con la mayor cantidad de logros obtenidos \n18. Jugadores que hayan tenido un porcentaje de tiros triples superior a: \n19. Jugador con la mayor cantidad de temporadas jugadas \n20. Jugadores, ordenados por posición en la cancha, que hayan tenido un porcentaje de tiros de campo superior a:  \n23. Tabla del Ranking \n0. Salir. \n"
+        "DREAM TEAM | Parcial\nSelecciona alguna de las opciones: \n1.Lista de Jugadores y su posicion  \n2. Estadisticas por jugador  \n3. Guardar en CSV estadisticas de la opcion 2  \n4. Logros por jugador  \n5. Ranking promedio de puntos por partido  \n6. ¿Miembro del salón de la Fama del Baloncesto?  \n7. Jugador con la mayor cantidad de rebotes totales  \n8. Jugador con el mayor porcentaje de tiros de campo. \n9. Jugador con la mayor cantidad de asistencias totales. \n10. Jugadores que han promediado más puntos por partido superior a: \n11. Jugadores que han promediado más rebotes por partido superior a: \n12. Jugadores que han promediado más asistencias por partido superior a: \n13. Jugador con la mayor cantidad de robos totales. \n14. Jugador con la mayor cantidad de bloqueos totales. \n15. Jugadores que hayan tenido un porcentaje de tiros libres superior a: \n16. Promedio de puntos por partido del equipo excluyendo al jugador con la menor cantidad. \n17. Jugador con la mayor cantidad de logros obtenidos \n18. Jugadores que hayan tenido un porcentaje de tiros triples superior a: \n19. Jugador con la mayor cantidad de temporadas jugadas \n20. Jugadores, ordenados por posición en la cancha, que hayan tenido un porcentaje de tiros de campo superior a:  \n23. Tabla del Ranking  \n30. Jugadores por posicion:  \n31. Veces en All-Star: \n32. Mejor jugador por estadistica:  \n33. Jugador con mejores estadisticas:  \n0. Salir. \n"
     )
 
     numeral_int = int(numeral_str)
@@ -589,6 +735,14 @@ while True:
             player_above_input_by_value("porcentaje_tiros_de_campo")
         case 23:
             ranking_by_stats()
+        case 30:
+            players_by_position()
+        case 31:
+            times_being_allstar(players_list)
+        case 32:
+            best_player_by_stat(players_list)
+        case 33:
+            best_overall_player()
         case 0:
             print("Gracias, nos vemos!")
             break
